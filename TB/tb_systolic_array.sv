@@ -38,7 +38,7 @@ module tb_systolic_array;
         // -----------------------------
         // Read Matrix A
         // -----------------------------
-        fa = $fopen("matrixA.txt", "r");
+        fa = $fopen("C:/Users/wwwmo/Downloads/8X8/tb/matrixA.txt", "r");
         if (fa == 0) begin
             $fatal("ERROR: Cannot open matrixA.txt");
         end
@@ -50,7 +50,7 @@ module tb_systolic_array;
         // -----------------------------
         // Read Matrix B
         // -----------------------------
-        fb = $fopen("matrixB.txt", "r");
+        fb = $fopen("C:/Users/wwwmo/Downloads/8X8/tb/matrixB.txt", "r");
         if (fb == 0) begin
             $fatal("ERROR: Cannot open matrixB.txt");
         end
