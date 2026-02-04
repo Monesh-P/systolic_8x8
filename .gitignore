@@ -1,0 +1,9 @@
+# Vivado generated files
+vivado_systolic_8x8/
+*.jou
+*.log
+*.str
+*.cache/
+*.runs/
+*.sim/
+*.hw/
