@@ -1,0 +1,6 @@
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/Users/wwwmo/Downloads/8X8/RTL/pe_node.sv" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module pe_node
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/Users/wwwmo/Downloads/8X8/RTL/systolic_array.sv" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module systolic_array
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/Users/wwwmo/Downloads/8X8/TB/tb_systolic_array.sv" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module tb_systolic_array

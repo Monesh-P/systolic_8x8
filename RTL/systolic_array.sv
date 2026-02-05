@@ -6,8 +6,8 @@ module systolic_array #(
     input  logic clk,
     input  logic rst,
 
-    input  logic [DATA_W-1:0] A_in [0:N-1],
-    input  logic [DATA_W-1:0] B_in [0:N-1],
+    input  logic [DATA_W-1:0] A_in [0:N-1],   // left edge
+    input  logic [DATA_W-1:0] B_in [0:N-1],   // top edge
 
     output logic [ACC_W-1:0]  C    [0:N-1][0:N-1]
 );
@@ -27,7 +27,7 @@ module systolic_array #(
     endgenerate
 
     // Cycle counter
-    logic [$clog2(4*N):0] cycle;
+    logic [$clog2(3*N):0] cycle;
     always_ff @(posedge clk or posedge rst) begin
         if (rst)
             cycle <= 0;
@@ -42,7 +42,7 @@ module systolic_array #(
             for (j = 0; j < N; j++) begin
                 assign pe_en[i][j] =
                     (cycle >= (i + j)) &&
-                    (cycle <  (i + j + N));
+                    (cycle <  (i + j + N+1));
             end
         end
     endgenerate

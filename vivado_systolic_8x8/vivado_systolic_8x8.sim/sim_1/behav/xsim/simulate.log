@@ -9,8 +9,4 @@ RESULT_BEGIN
 0 0 0 0 0 0 0 0 
 0 0 0 0 0 0 0 0 
 RESULT_END
-=================================
-TOTAL MAC OPERATIONS = 512
-EXPECTED (DENSE)     = 512
-=================================
-$finish called at time : 655 ns : File "C:/Users/wwwmo/Downloads/8X8/TB/tb_systolic_array.sv" Line 84
+$finish called at time : 655 ns : File "C:/Users/wwwmo/Downloads/8X8/TB/tb_systolic_array.sv" Line 91

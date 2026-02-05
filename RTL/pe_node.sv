@@ -1,3 +1,4 @@
+
 module pe_node #(
     parameter int DATA_W = 8,
     parameter int ACC_W  = 16
@@ -11,6 +12,7 @@ module pe_node #(
 
     output logic [DATA_W-1:0]    a_out,
     output logic [DATA_W-1:0]    b_out,
+
     output logic [ACC_W-1:0]     acc
 );
 
@@ -22,7 +24,6 @@ module pe_node #(
         end else begin
             a_out <= a_in;
             b_out <= b_in;
-
             if (en)
                 acc <= acc + (a_in * b_in);
         end
