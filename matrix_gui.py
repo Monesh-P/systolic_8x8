@@ -1,135 +1,127 @@
 import tkinter as tk
 from tkinter import messagebox
 import subprocess
-import os
-import time
 
-# ---------------- CONFIG ----------------
 N = 8
+VIVADO_CMD = [
+    r"C:\Xilinx\2025.1\Vivado\bin\vivado.bat",
+    "-mode", "batch",
+    "-source", "run_sim.tcl"
+]
 
-VIVADO_CMD = r"C:\Xilinx\2025.1\Vivado\bin\vivado.bat"
-TCL_SCRIPT = "run_sim.tcl"
-XSIM_LOG = "vivado_systolic_8x8.sim/sim_1/behav/xsim/xsim.log"
+def save_matrices():
+    try:
+        with open("TB/matrixA.txt", "w") as fa:
+            for i in range(N):
+                fa.write(" ".join(entryA[i][j].get() for j in range(N)) + "\n")
+
+        with open("TB/matrixB.txt", "w") as fb:
+            for i in range(N):
+                fb.write(" ".join(entryB[i][j].get() for j in range(N)) + "\n")
+
+    except Exception as e:
+        messagebox.showerror("File Error", str(e))
+
+
+def run_vivado():
+    save_matrices()
+    output_box.delete("1.0", tk.END)
+    output_box.insert(tk.END, "Running Vivado simulation...\n\n")
+
+    try:
+        proc = subprocess.run(
+            VIVADO_CMD,
+            capture_output=True,
+            text=True,
+            shell=True
+        )
+
+        stdout = proc.stdout.splitlines()
+
+        result_started = False
+        matrix = []
+
+        for line in stdout:
+            if "RESULT_BEGIN" in line:
+                result_started = True
+                continue
+            if "RESULT_END" in line:
+                break
+            if result_started:
+                matrix.append(line)
+
+        if matrix:
+            output_box.insert(tk.END, "Output Matrix C:\n\n")
+            for row in matrix:
+                output_box.insert(tk.END, row + "\n")
+        else:
+            output_box.insert(tk.END, "No output matrix found.\n")
+
+    except Exception as e:
+        messagebox.showerror("Vivado Error", str(e))
+
 
 # ---------------- GUI ----------------
 root = tk.Tk()
 root.title("8×8 Systolic Array – Full Interface")
+root.geometry("1250x650")
 
-entries_A = []
-entries_B = []
+main_frame = tk.Frame(root)
+main_frame.pack(pady=15)
 
-# ---------------- MATRIX INPUT UI ----------------
-def create_matrix(frame, entries):
-    for i in range(N):
-        row = []
-        for j in range(N):
-            e = tk.Entry(frame, width=3, justify="center")
-            e.insert(0, "0")
-            e.grid(row=i, column=j, padx=3, pady=3)
-            row.append(e)
-        entries.append(row)
+# -------- Matrix A --------
+frameA = tk.Frame(main_frame)
+frameA.grid(row=0, column=0)
 
-frame_top = tk.Frame(root)
-frame_top.pack(pady=10)
+tk.Label(frameA, text="Matrix A", font=("Arial", 14, "bold")).grid(
+    row=0, column=0, columnspan=N, pady=10
+)
 
-frame_A = tk.Frame(frame_top)
-frame_A.pack(side="left", padx=40)
+entryA = [[None]*N for _ in range(N)]
+for i in range(N):
+    for j in range(N):
+        e = tk.Entry(frameA, width=4, justify="center")
+        e.grid(row=i+1, column=j, padx=3, pady=3)
+        e.insert(0, "0")
+        entryA[i][j] = e
 
-frame_B = tk.Frame(frame_top)
-frame_B.pack(side="left", padx=40)
+# -------- BIG GAP --------
+tk.Label(main_frame, text=" " * 25).grid(row=0, column=1)
 
-tk.Label(frame_A, text="Matrix A", font=("Arial", 12, "bold")).pack()
-tk.Label(frame_B, text="Matrix B", font=("Arial", 12, "bold")).pack()
+# -------- Matrix B --------
+frameB = tk.Frame(main_frame)
+frameB.grid(row=0, column=2)
 
-matA_frame = tk.Frame(frame_A)
-matA_frame.pack()
-create_matrix(matA_frame, entries_A)
+tk.Label(frameB, text="Matrix B", font=("Arial", 14, "bold")).grid(
+    row=0, column=0, columnspan=N, pady=10
+)
 
-matB_frame = tk.Frame(frame_B)
-matB_frame.pack()
-create_matrix(matB_frame, entries_B)
+entryB = [[None]*N for _ in range(N)]
+for i in range(N):
+    for j in range(N):
+        e = tk.Entry(frameB, width=4, justify="center")
+        e.grid(row=i+1, column=j, padx=3, pady=3)
+        e.insert(0, "0")
+        entryB[i][j] = e
 
-# ---------------- SAVE MATRICES ----------------
-def save_matrices():
-    with open("matrixA.txt", "w") as fa:
-        for row in entries_A:
-            fa.write(" ".join(e.get() for e in row) + "\n")
+# -------- Buttons --------
+btn_frame = tk.Frame(root)
+btn_frame.pack(pady=15)
 
-    with open("matrixB.txt", "w") as fb:
-        for row in entries_B:
-            fb.write(" ".join(e.get() for e in row) + "\n")
-
-# ---------------- READ OUTPUT ----------------
-def read_output_matrix():
-    if not os.path.exists(XSIM_LOG):
-        return None
-
-    with open(XSIM_LOG, "r") as f:
-        lines = f.readlines()
-
-    matrix = []
-    capture = False
-
-    for line in lines:
-        if "Output Matrix C:" in line:
-            capture = True
-            continue
-        if capture:
-            if line.strip() == "" or "MAC_COUNT" in line:
-                break
-            try:
-                row = [int(x) for x in line.strip().split()]
-                matrix.append(row)
-            except:
-                pass
-
-    return matrix
-
-# ---------------- RUN VIVADO ----------------
-def run_vivado():
-    output_box.delete("1.0", tk.END)
-    output_box.insert(tk.END, "Running Vivado simulation...\n")
-
-    save_matrices()
-
-    try:
-        subprocess.run(
-            [VIVADO_CMD, "-mode", "batch", "-source", TCL_SCRIPT],
-            check=True
-        )
-    except subprocess.CalledProcessError:
-        output_box.insert(tk.END, "Vivado execution failed.\n")
-        return
-
-    time.sleep(1)  # allow log to flush
-
-    matrix = read_output_matrix()
-
-    output_box.delete("1.0", tk.END)
-
-    if not matrix:
-        output_box.insert(tk.END, "No output matrix found.\n")
-    else:
-        output_box.insert(tk.END, "Output Matrix C:\n")
-        for row in matrix:
-            output_box.insert(tk.END, " ".join(map(str, row)) + "\n")
-
-# ---------------- BUTTON ----------------
 tk.Button(
-    root,
+    btn_frame,
     text="Run Vivado Simulation",
-    bg="lightgreen",
     font=("Arial", 12, "bold"),
-    command=run_vivado,
-    width=25,
-    height=2
-).pack(pady=10)
+    bg="#6fdc6f",
+    padx=20,
+    pady=8,
+    command=run_vivado
+).pack()
 
-# ---------------- OUTPUT ----------------
-tk.Label(root, text="Output Matrix C", font=("Arial", 12, "bold")).pack()
+# -------- Output --------
+tk.Label(root, text="Output Matrix C", font=("Arial", 14, "bold")).pack()
 
-output_box = tk.Text(root, height=10, width=60)
+output_box = tk.Text(root, height=12, width=80, font=("Courier", 10))
 output_box.pack(pady=10)
 
-# ---------------- START GUI ----------------
 root.mainloop()
