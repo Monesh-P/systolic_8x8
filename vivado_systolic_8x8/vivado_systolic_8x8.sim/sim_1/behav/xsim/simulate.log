@@ -1,12 +1,14 @@
 Time resolution is 1 ps
-RESULT_BEGIN
-7 0 0 0 0 0 0 0 
-0 0 0 0 0 0 0 0 
-0 0 0 0 0 0 0 0 
-0 0 0 0 0 0 0 0 
-0 0 0 0 0 0 0 0 
-0 0 0 0 0 0 0 0 
-0 0 0 0 0 0 0 0 
-0 0 0 0 0 0 0 0 
-RESULT_END
-$finish called at time : 655 ns : File "C:/Users/wwwmo/Downloads/8X8/TB/tb_systolic_array.sv" Line 91
+
+===== MATRIX C (A x B) =====
+     8      0      0      0      0      0      0      0 
+     0      0      0      0      0      0      0      0 
+     0      0      0      0      0      0      0      0 
+     0      0      0      0      0      0      0      0 
+     0      0      0      0      0      0      0      0 
+     0      0      0      0      0      0      0      0 
+     0      0      0      0      0      0      0      0 
+     0      0      0      0      0      0      0      0 
+===========================
+
+$finish called at time : 815 ns : File "C:/Users/wwwmo/Downloads/8X8/TB/tb_systolic_array.sv" Line 97
