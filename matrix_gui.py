@@ -7,7 +7,7 @@ import time
 # ---------------- CONFIG ----------------
 N = 8
 
-VIVADO_CMD = r"C:\Xilinx\2025.1\Vivado\bin\vivado.exe"
+VIVADO_CMD = r"C:\Xilinx\2025.1\Vivado\bin\vivado.bat"
 TCL_SCRIPT = "run_sim.tcl"
 XSIM_LOG = "vivado_systolic_8x8.sim/sim_1/behav/xsim/xsim.log"
 
