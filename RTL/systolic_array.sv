@@ -6,34 +6,44 @@ module systolic_array #(
     input  logic clk,
     input  logic rst,
 
-    input  logic [DATA_W-1:0] A_in [0:N-1],
-    input  logic [DATA_W-1:0] B_in [0:N-1],
+    input  logic [DATA_W-1:0] A_in [0:N-1],   // left edge inputs
+    input  logic [DATA_W-1:0] B_in [0:N-1],   // top edge inputs
 
     output logic [ACC_W-1:0]  C    [0:N-1][0:N-1]
 );
 
-    // Inter-PE pipelines
+    // ------------------------------------------------------------
+    // Internal pipelines
+    // ------------------------------------------------------------
     logic [DATA_W-1:0] a_pipe [0:N-1][0:N];
     logic [DATA_W-1:0] b_pipe [0:N][0:N-1];
 
-    // MAC valid signals from PEs
+    // MAC-valid signals from each PE
     logic mac_valid [0:N-1][0:N-1];
 
     // Global MAC counter
     integer total_mac_count;
+    integer macs_this_cycle;
 
-    // Inject inputs
+    // ------------------------------------------------------------
+    // Input injection
+    // ------------------------------------------------------------
     genvar i, j;
     generate
-        for (i = 0; i < N; i++)
+        for (i = 0; i < N; i++) begin
             assign a_pipe[i][0] = A_in[i];
+        end
 
-        for (j = 0; j < N; j++)
+        for (j = 0; j < N; j++) begin
             assign b_pipe[0][j] = B_in[j];
+        end
     endgenerate
 
-    // Cycle counter
-    logic [$clog2(3*N):0] cycle;
+    // ------------------------------------------------------------
+    // Cycle counter (controls PE enable window)
+    // ------------------------------------------------------------
+    logic [$clog2(4*N):0] cycle;
+
     always_ff @(posedge clk or posedge rst) begin
         if (rst)
             cycle <= 0;
@@ -41,8 +51,11 @@ module systolic_array #(
             cycle <= cycle + 1;
     end
 
-    // PE enable window
+    // ------------------------------------------------------------
+    // PE enable generation
+    // ------------------------------------------------------------
     logic pe_en [0:N-1][0:N-1];
+
     generate
         for (i = 0; i < N; i++) begin
             for (j = 0; j < N; j++) begin
@@ -53,14 +66,16 @@ module systolic_array #(
         end
     endgenerate
 
+    // ------------------------------------------------------------
     // PE array
+    // ------------------------------------------------------------
     generate
         for (i = 0; i < N; i++) begin
             for (j = 0; j < N; j++) begin
                 pe_node #(
                     .DATA_W(DATA_W),
                     .ACC_W (ACC_W)
-                ) pe (
+                ) pe_inst (
                     .clk       (clk),
                     .rst       (rst),
                     .en        (pe_en[i][j]),
@@ -75,17 +90,23 @@ module systolic_array #(
         end
     endgenerate
 
-    // Global MAC counter
+    // ------------------------------------------------------------
+    // GLOBAL MAC COUNTER (CORRECT IMPLEMENTATION)
+    // ------------------------------------------------------------
     always_ff @(posedge clk or posedge rst) begin
-        if (rst)
+        if (rst) begin
             total_mac_count <= 0;
-        else begin
+        end else begin
+            macs_this_cycle = 0;
+
             for (int x = 0; x < N; x++) begin
                 for (int y = 0; y < N; y++) begin
                     if (mac_valid[x][y])
-                        total_mac_count <= total_mac_count + 1;
+                        macs_this_cycle++;
                 end
             end
+
+            total_mac_count <= total_mac_count + macs_this_cycle;
         end
     end
 
