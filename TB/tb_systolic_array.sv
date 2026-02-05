@@ -86,13 +86,15 @@ module tb_systolic_array;
         // -----------------------------
         // Print Output
         // -----------------------------
-        $display("\n===== MATRIX C (A x B) =====");
+        $display("RESULT_BEGIN");
         for (i = 0; i < N; i++) begin
-            for (j = 0; j < N; j++)
-                $write("%6d ", C[i][j]);
+            for (j = 0; j < N; j++) begin
+                $write("%0d ", C[i][j]);
+            end
             $write("\n");
         end
-        $display("===========================\n");
+        $display("RESULT_END");
+
 
         $finish;
     end
