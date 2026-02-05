@@ -64,7 +64,7 @@ module tb_systolic_array;
                 B_in[j] = (t-j>=0 && t-j<N) ? B[t-j][j] : 0;
         end
 
-        repeat (3*N) @(posedge clk);
+        repeat (6*N) @(posedge clk);
 
         // Output matrix
         $display("RESULT_BEGIN");
