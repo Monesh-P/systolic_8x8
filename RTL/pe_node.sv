@@ -11,25 +11,21 @@ module pe_node #(
 
     output logic [DATA_W-1:0]    a_out,
     output logic [DATA_W-1:0]    b_out,
-    output logic [ACC_W-1:0]     acc,
-    output logic                 mac_valid   // 🔹 NEW
+    output logic [ACC_W-1:0]     acc
 );
 
     always_ff @(posedge clk) begin
         if (rst) begin
-            acc       <= '0;
-            a_out     <= '0;
-            b_out     <= '0;
-            mac_valid <= 0;
+            acc   <= '0;
+            a_out <= '0;
+            b_out <= '0;
         end else begin
             a_out <= a_in;
             b_out <= b_in;
-            mac_valid <= 0;
 
-            if (en) begin
+            if (en)
                 acc <= acc + (a_in * b_in);
-                mac_valid <= 1;   // MAC happened this cycle
-            end
         end
     end
+
 endmodule

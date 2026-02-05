@@ -14,6 +14,7 @@ module tb_systolic_array;
     logic [DATA_W-1:0] A [0:N-1][0:N-1];
     logic [DATA_W-1:0] B [0:N-1][0:N-1];
 
+    // DUT
     systolic_array #(
         .N(N),
         .DATA_W(DATA_W),
@@ -26,7 +27,7 @@ module tb_systolic_array;
         .C   (C)
     );
 
-    // Clock
+    // Clock generation
     always #5 clk = ~clk;
 
     int t, i, j;
@@ -35,11 +36,15 @@ module tb_systolic_array;
         clk = 0;
         rst = 1;
 
-        // Example matrices
+        // -----------------------------
+        // TEST MATRIX
+        // -----------------------------
+        // Matrix A: first row = 1s
         A[0] = '{1,1,1,1,1,1,1,1};
         for (i = 1; i < N; i++)
             A[i] = '{default:0};
 
+        // Matrix B: first column = 1s
         for (i = 0; i < N; i++) begin
             B[i] = '{default:0};
             B[i][0] = 1;
@@ -51,22 +56,30 @@ module tb_systolic_array;
             B_in[i] = 0;
         end
 
+        // Release reset
         #20 rst = 0;
 
-        // Correct systolic feed
+        // -----------------------------
+        // SYSTOLIC FEED (SKEWED)
+        // -----------------------------
         for (t = 0; t < (2*N); t++) begin
             @(posedge clk);
 
             for (i = 0; i < N; i++)
-                A_in[i] = (t-i>=0 && t-i<N) ? A[i][t-i] : 0;
+                A_in[i] = (t-i >= 0 && t-i < N) ? A[i][t-i] : 0;
 
             for (j = 0; j < N; j++)
-                B_in[j] = (t-j>=0 && t-j<N) ? B[t-j][j] : 0;
+                B_in[j] = (t-j >= 0 && t-j < N) ? B[t-j][j] : 0;
         end
 
+        // -----------------------------
+        // DRAIN PIPELINE (IMPORTANT)
+        // -----------------------------
         repeat (6*N) @(posedge clk);
 
-        // Output matrix
+        // -----------------------------
+        // PRINT RESULT
+        // -----------------------------
         $display("RESULT_BEGIN");
         for (i = 0; i < N; i++) begin
             for (j = 0; j < N; j++)
@@ -74,12 +87,6 @@ module tb_systolic_array;
             $write("\n");
         end
         $display("RESULT_END");
-
-        // MAC count
-        $display("=================================");
-        $display("TOTAL MAC OPERATIONS = %0d", dut.total_mac_count);
-        $display("EXPECTED (DENSE)     = %0d", N*N*N);
-        $display("=================================");
 
         $finish;
     end
