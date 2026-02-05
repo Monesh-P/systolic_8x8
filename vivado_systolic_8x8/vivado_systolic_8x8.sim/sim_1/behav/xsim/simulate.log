@@ -1,6 +1,6 @@
 Time resolution is 1 ps
 RESULT_BEGIN
-8 0 0 0 0 0 0 0 
+7 0 0 0 0 0 0 0 
 0 0 0 0 0 0 0 0 
 0 0 0 0 0 0 0 0 
 0 0 0 0 0 0 0 0 
@@ -9,4 +9,8 @@ RESULT_BEGIN
 0 0 0 0 0 0 0 0 
 0 0 0 0 0 0 0 0 
 RESULT_END
-$finish called at time : 815 ns : File "C:/Users/wwwmo/Downloads/8X8/TB/tb_systolic_array.sv" Line 99
+=================================
+TOTAL MAC OPERATIONS = 22
+EXPECTED (DENSE)     = 512
+=================================
+$finish called at time : 335 ns : File "C:/Users/wwwmo/Downloads/8X8/TB/tb_systolic_array.sv" Line 84

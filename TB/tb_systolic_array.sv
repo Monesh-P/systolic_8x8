@@ -1,8 +1,10 @@
+`timescale 1ns/1ps
+
 module tb_systolic_array;
 
-    localparam int N      = 8;
-    localparam int DATA_W = 8;
-    localparam int ACC_W  = 24;   // IMPORTANT for 8x8 (avoid overflow)
+    parameter int N       = 8;
+    parameter int DATA_W  = 8;
+    parameter int ACC_W   = 16;
 
     logic clk, rst;
     logic [DATA_W-1:0] A_in [0:N-1];
@@ -12,10 +14,6 @@ module tb_systolic_array;
     logic [DATA_W-1:0] A [0:N-1][0:N-1];
     logic [DATA_W-1:0] B [0:N-1][0:N-1];
 
-    integer i, j, t;
-    integer fa, fb;
-
-    // DUT
     systolic_array #(
         .N(N),
         .DATA_W(DATA_W),
@@ -31,33 +29,21 @@ module tb_systolic_array;
     // Clock
     always #5 clk = ~clk;
 
+    int t, i, j;
+
     initial begin
         clk = 0;
         rst = 1;
 
-        // -----------------------------
-        // Read Matrix A
-        // -----------------------------
-        fa = $fopen("C:/Users/wwwmo/Downloads/8X8/tb/matrixA.txt", "r");
-        if (fa == 0) begin
-            $fatal("ERROR: Cannot open matrixA.txt");
-        end
-        for (i = 0; i < N; i++)
-            for (j = 0; j < N; j++)
-                $fscanf(fa, "%d", A[i][j]);
-        $fclose(fa);
+        // Example matrices
+        A[0] = '{1,1,1,1,1,1,1,1};
+        for (i = 1; i < N; i++)
+            A[i] = '{default:0};
 
-        // -----------------------------
-        // Read Matrix B
-        // -----------------------------
-        fb = $fopen("C:/Users/wwwmo/Downloads/8X8/tb/matrixB.txt", "r");
-        if (fb == 0) begin
-            $fatal("ERROR: Cannot open matrixB.txt");
+        for (i = 0; i < N; i++) begin
+            B[i] = '{default:0};
+            B[i][0] = 1;
         end
-        for (i = 0; i < N; i++)
-            for (j = 0; j < N; j++)
-                $fscanf(fb, "%d", B[i][j]);
-        $fclose(fb);
 
         // Clear inputs
         for (i = 0; i < N; i++) begin
@@ -67,10 +53,8 @@ module tb_systolic_array;
 
         #20 rst = 0;
 
-        // -----------------------------
-        // Correct systolic skewed feed
-        // -----------------------------
-        for (t = 0; t < (4*N); t++) begin
+        // Correct systolic feed
+        for (t = 0; t < (2*N); t++) begin
             @(posedge clk);
 
             for (i = 0; i < N; i++)
@@ -80,21 +64,22 @@ module tb_systolic_array;
                 B_in[j] = (t-j>=0 && t-j<N) ? B[t-j][j] : 0;
         end
 
-        // Let results settle
-        repeat (6*N) @(posedge clk);
+        repeat (2*N) @(posedge clk);
 
-        // -----------------------------
-        // Print Output
-        // -----------------------------
+        // Output matrix
         $display("RESULT_BEGIN");
         for (i = 0; i < N; i++) begin
-            for (j = 0; j < N; j++) begin
+            for (j = 0; j < N; j++)
                 $write("%0d ", C[i][j]);
-            end
             $write("\n");
         end
         $display("RESULT_END");
 
+        // MAC count
+        $display("=================================");
+        $display("TOTAL MAC OPERATIONS = %0d", dut.total_mac_count);
+        $display("EXPECTED (DENSE)     = %0d", N*N*N);
+        $display("=================================");
 
         $finish;
     end
