@@ -62,6 +62,7 @@ def run_vivado():
             output_box.insert(tk.END, "\nMAC OPERATIONS PER PE:\n\n")
             for line in mac_lines:
                 output_box.insert(tk.END, line + "\n")
+                
         else:
             output_box.insert(tk.END, "No output matrix found.\n")
 
