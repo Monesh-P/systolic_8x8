@@ -40,6 +40,7 @@ def run_vivado():
 
         result_started = False
         matrix = []
+        mac_lines = []
 
         for line in stdout:
             if "RESULT_BEGIN" in line:
@@ -49,11 +50,18 @@ def run_vivado():
                 break
             if result_started:
                 matrix.append(line)
+            if "MAC operations" in line:
+                mac_lines.append(line)
 
         if matrix:
             output_box.insert(tk.END, "Output Matrix C:\n\n")
             for row in matrix:
                 output_box.insert(tk.END, row + "\n")
+
+        if mac_lines:
+            output_box.insert(tk.END, "\nMAC OPERATIONS PER PE:\n\n")
+            for line in mac_lines:
+                output_box.insert(tk.END, line + "\n")
         else:
             output_box.insert(tk.END, "No output matrix found.\n")
 
