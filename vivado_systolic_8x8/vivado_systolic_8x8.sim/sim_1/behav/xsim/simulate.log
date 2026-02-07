@@ -1,6 +1,6 @@
 Time resolution is 1 ps
-Output Matrix C:
-8 0 0 0 0 0 0 0 
+RESULT_BEGIN
+1 0 0 0 0 0 0 0 
 0 0 0 0 0 0 0 0 
 0 0 0 0 0 0 0 0 
 0 0 0 0 0 0 0 0 
@@ -8,5 +8,7 @@ Output Matrix C:
 0 0 0 0 0 0 0 0 
 0 0 0 0 0 0 0 0 
 0 0 0 0 0 0 0 0 
-MAC_COUNT = 43
-$finish called at time : 455 ns : File "C:/Users/wwwmo/Downloads/8X8/TB/tb_systolic_array.sv" Line 100
+RESULT_END
+===========================
+
+$finish called at time : 815 ns : File "C:/Users/wwwmo/Downloads/8X8/TB/tb_systolic_array.sv" Line 99
