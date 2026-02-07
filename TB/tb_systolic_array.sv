@@ -61,7 +61,7 @@ module tb_systolic_array;
         end
 
         // Open CSV file for MAC trace
-        fd = $fopen("mac_trace.csv", "w");
+        fd = $fopen("./mac_trace.csv", "w");
         $fwrite(fd, "time,row,col,a,b,mac,acc\n");
 
         // Hold reset
