@@ -1,30 +1,21 @@
-`timescale 1ns/1ps
-
 module tb_systolic_array;
 
-    // ------------------------------------------------------------
-    // Parameters
-    // ------------------------------------------------------------
     localparam int N      = 8;
     localparam int DATA_W = 8;
-    localparam int ACC_W  = 16;
+    localparam int ACC_W  = 24;   // IMPORTANT for 8x8 (avoid overflow)
 
-    // ------------------------------------------------------------
-    // Clock & Reset
-    // ------------------------------------------------------------
-    logic clk;
-    logic rst;
-
-    // ------------------------------------------------------------
-    // Inputs / Outputs
-    // ------------------------------------------------------------
+    logic clk, rst;
     logic [DATA_W-1:0] A_in [0:N-1];
     logic [DATA_W-1:0] B_in [0:N-1];
     logic [ACC_W-1:0]  C    [0:N-1][0:N-1];
 
-    // ------------------------------------------------------------
+    logic [DATA_W-1:0] A [0:N-1][0:N-1];
+    logic [DATA_W-1:0] B [0:N-1][0:N-1];
+
+    integer i, j, t;
+    integer fa, fb;
+
     // DUT
-    // ------------------------------------------------------------
     systolic_array #(
         .N(N),
         .DATA_W(DATA_W),
@@ -37,95 +28,75 @@ module tb_systolic_array;
         .C   (C)
     );
 
-    // ------------------------------------------------------------
-    // Clock generation (10ns period)
-    // ------------------------------------------------------------
+    // Clock
     always #5 clk = ~clk;
 
-    // ------------------------------------------------------------
-    // File handle for MAC trace
-    // ------------------------------------------------------------
-    integer fd;
-
-    // ------------------------------------------------------------
-    // Test sequence
-    // ------------------------------------------------------------
     initial begin
         clk = 0;
         rst = 1;
 
-        // Initialize inputs
-        for (int i = 0; i < N; i++) begin
+        // -----------------------------
+        // Read Matrix A
+        // -----------------------------
+        fa = $fopen("C:/Users/wwwmo/Downloads/8X8/tb/matrixA.txt", "r");
+        if (fa == 0) begin
+            $fatal("ERROR: Cannot open matrixA.txt");
+        end
+        for (i = 0; i < N; i++)
+            for (j = 0; j < N; j++)
+                $fscanf(fa, "%d", A[i][j]);
+        $fclose(fa);
+
+        // -----------------------------
+        // Read Matrix B
+        // -----------------------------
+        fb = $fopen("C:/Users/wwwmo/Downloads/8X8/tb/matrixB.txt", "r");
+        if (fb == 0) begin
+            $fatal("ERROR: Cannot open matrixB.txt");
+        end
+        for (i = 0; i < N; i++)
+            for (j = 0; j < N; j++)
+                $fscanf(fb, "%d", B[i][j]);
+        $fclose(fb);
+
+        // Clear inputs
+        for (i = 0; i < N; i++) begin
             A_in[i] = 0;
             B_in[i] = 0;
         end
 
-        // Open CSV file for MAC trace
-        fd = $fopen("./mac_trace.csv", "w");
-        $fwrite(fd, "time,row,col,a,b,mac,acc\n");
+        #20 rst = 0;
 
-        // Hold reset
-        #20;
-        rst = 0;
+        // -----------------------------
+        // Correct systolic skewed feed
+        // -----------------------------
+        for (t = 0; t < (4*N); t++) begin
+            @(posedge clk);
 
-        // --------------------------------------------------------
-        // Feed matrix A (left) and B (top)
-        // --------------------------------------------------------
-        for (int k = 0; k < N; k++) begin
-            A_in[k] = k + 1;        // 1 2 3 4 5 6 7 8
-            B_in[k] = (k + 1) * 2;  // 2 4 6 8 10 12 14 16
+            for (i = 0; i < N; i++)
+                A_in[i] = (t-i>=0 && t-i<N) ? A[i][t-i] : 0;
+
+            for (j = 0; j < N; j++)
+                B_in[j] = (t-j>=0 && t-j<N) ? B[t-j][j] : 0;
         end
 
-        // --------------------------------------------------------
-        // Let systolic array complete computation
-        // --------------------------------------------------------
-        #(20*N);
+        // Let results settle
+        repeat (6*N) @(posedge clk);
 
-        // --------------------------------------------------------
-        // PRINT RESULT MATRIX (FOR PYTHON GUI)
-        // --------------------------------------------------------
+        // -----------------------------
+        // Print Output
+        // -----------------------------
         $display("RESULT_BEGIN");
-        for (int i = 0; i < N; i++) begin
-            $display("%0d %0d %0d %0d %0d %0d %0d %0d",
-                C[i][0], C[i][1], C[i][2], C[i][3],
-                C[i][4], C[i][5], C[i][6], C[i][7]
-            );
+        for (i = 0; i < N; i++) begin
+            for (j = 0; j < N; j++) begin
+                $write("%0d ", C[i][j]);
+            end
+            $write("\n");
         end
         $display("RESULT_END");
+        $display("===========================\n");
 
-        // --------------------------------------------------------
-        // Finish simulation
-        // --------------------------------------------------------
-        #100;
         $finish;
-    end
-
-    // ------------------------------------------------------------
-    // MAC logging (cycle-accurate)
-    // ------------------------------------------------------------
-    always @(posedge clk) begin
-        for (int i = 0; i < N; i++) begin
-            for (int j = 0; j < N; j++) begin
-                if (dut.mac_valid[i][j]) begin
-                    $fwrite(fd,
-                        "%0t,%0d,%0d,%0d,%0d,%0d,%0d\n",
-                        $time,
-                        i, j,
-                        dut.a_dbg[i][j],
-                        dut.b_dbg[i][j],
-                        dut.mac_dbg[i][j],
-                        dut.acc_dbg[i][j]
-                    );
-                end
-            end
-        end
-    end
-
-    // ------------------------------------------------------------
-    // Close file cleanly
-    // ------------------------------------------------------------
-    final begin
-        $fclose(fd);
     end
 
 endmodule
