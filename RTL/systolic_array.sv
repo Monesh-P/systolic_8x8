@@ -1,12 +1,12 @@
 module systolic_array #(
-    parameter int N       = 8,
+    parameter int N       = 4,
     parameter int DATA_W  = 8,
     parameter int ACC_W   = 16
 )(
     input  logic clk,
     input  logic rst,
 
-    input  logic [DATA_W-1:0] A_in [0:N-1],   // left edge
+    input  logic [DATA_W-1:0] A_in [0:N-1],   
     input  logic [DATA_W-1:0] B_in [0:N-1],   // top edge
 
     output logic [ACC_W-1:0]  C    [0:N-1][0:N-1]

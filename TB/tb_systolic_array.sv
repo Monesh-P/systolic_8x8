@@ -1,6 +1,6 @@
 module tb_systolic_array;
 
-    localparam int N      = 8;
+    localparam int N      = 4;
     localparam int DATA_W = 8;
     localparam int ACC_W  = 24;   // IMPORTANT for 8x8 (avoid overflow)
 

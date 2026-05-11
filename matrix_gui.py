@@ -3,7 +3,7 @@ from tkinter import messagebox
 import subprocess
 
 # ---------------- CONFIG ----------------
-N = 8
+N = 4
 VIVADO_CMD = [
     r"C:\Xilinx\2025.1\Vivado\bin\vivado.bat",
     "-mode", "batch",
